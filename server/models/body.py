@@ -1,5 +1,7 @@
+from datetime import datetime
 from enum import Enum
 from pydantic import BaseModel, Field
+from uuid import UUID
 
 
 class UserBase(BaseModel):
@@ -12,7 +14,7 @@ class UserBase(BaseModel):
         description="Username must be 4-16 characters long and only contain lowercase letters, numbers and underscores.",
     )
     email: str | None = Field(
-        pattern=r"^\S+@\S+\.\S+$",
+        pattern=r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
         description="Invalid email address.",
     )
     display_name: str | None = Field(
@@ -36,9 +38,9 @@ class UserIn(UserBase):
 class UserOut(UserBase):
     """User response body model."""
 
-    uuid: str
-    created_at: str
-    updated_at: str
+    uuid: UUID
+    created_at: datetime
+    updated_at: datetime
 
 
 class SpaceBase(BaseModel):
@@ -62,9 +64,9 @@ class SpaceIn(SpaceBase):
 class SpaceOut(SpaceBase):
     """Space response body model."""
 
-    uuid: str
-    created_at: str
-    updated_at: str
+    uuid: UUID
+    created_at: datetime
+    updated_at: datetime
 
 
 class CategoryBase(BaseModel):
@@ -76,7 +78,7 @@ class CategoryBase(BaseModel):
         description="Category name must be 2-16 characters long.",
     )
     icon: str | None = None
-    space_uuid: str
+    space_uuid: UUID
 
 
 class CategoryIn(CategoryBase):
@@ -88,9 +90,9 @@ class CategoryIn(CategoryBase):
 class CategoryOut(CategoryBase):
     """Category response body model."""
 
-    uuid: str
-    created_at: str
-    updated_at: str
+    uuid: UUID
+    created_at: datetime
+    updated_at: datetime
 
 
 class Currency(str, Enum):
@@ -118,8 +120,11 @@ class Interval(str, Enum):
 class Payer(BaseModel):
     """Payer model."""
 
-    user_uuid: str
-    amount: float
+    user_uuid: UUID
+    amount: float = Field(
+        ge=0,
+        description="Amount must be a non-negative number.",
+    )
 
 
 class BillBase(BaseModel):
@@ -132,12 +137,19 @@ class BillBase(BaseModel):
     )
     icon: str | None = None
     note: str | None = None
+    amount: float = Field(
+        ge=0,
+        description="Amount must be a non-negative number.",
+    )
     currency: Currency
-    cycle: int
+    cycle: int = Field(
+        ge=1,
+        description="Cycle must be a positive integer.",
+    )
     interval: Interval
     first_bill: str
-    space_uuid: str
-    category_uuid: str
+    space_uuid: UUID
+    category_uuid: UUID
     payers: list[Payer] | None = None
 
 
@@ -150,6 +162,6 @@ class BillIn(BillBase):
 class BillOut(BillBase):
     """Bill response body model."""
 
-    uuid: str
-    created_at: str
-    updated_at: str
+    uuid: UUID
+    created_at: datetime
+    updated_at: datetime
