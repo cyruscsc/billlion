@@ -1,16 +1,7 @@
 import datetime, enum, uuid
 from database import Base
 from datetime import datetime
-from sqlalchemy import (
-    Column,
-    DateTime,
-    Enum,
-    ForeignKey,
-    Integer,
-    String,
-    Table,
-    Uuid,
-)
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Uuid
 from sqlalchemy.orm import relationship
 
 
@@ -47,9 +38,17 @@ class Space(Base):
     users = relationship("User", secondary="space_user", back_populates="spaces")
 
 
-space_user = Table(
-    "space_user",
-    Base.metadata,
-    Column("space_uuid", Uuid, ForeignKey("spaces.uuid"), primary_key=True),
-    Column("user_uuid", Uuid, ForeignKey("users.uuid"), primary_key=True),
-)
+class Role(str, enum.Enum):
+    owner = "owner"
+    editor = "editor"
+    viewer = "viewer"
+
+
+class SpaceUser(Base):
+    __tablename__ = "space_user"
+
+    space_uuid = Column(Uuid, ForeignKey("spaces.uuid"), primary_key=True)
+    user_uuid = Column(Uuid, ForeignKey("users.uuid"), primary_key=True)
+    role = Column(Enum(Role), default=Role.viewer)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)
