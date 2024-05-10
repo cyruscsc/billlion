@@ -42,6 +42,9 @@ class UserOut(UserBase):
     created_at: datetime
     updated_at: datetime
 
+    class Config:
+        orm_mode = True
+
 
 class SpaceBase(BaseModel):
     """Space base model."""
@@ -68,6 +71,9 @@ class SpaceOut(SpaceBase):
     created_at: datetime
     updated_at: datetime
 
+    class Config:
+        orm_mode = True
+
 
 class CategoryBase(BaseModel):
     """Category base model."""
@@ -93,6 +99,9 @@ class CategoryOut(CategoryBase):
     uuid: UUID
     created_at: datetime
     updated_at: datetime
+
+    class Config:
+        orm_mode = True
 
 
 class Currency(str, Enum):
@@ -165,3 +174,6 @@ class BillOut(BillBase):
     uuid: UUID
     created_at: datetime
     updated_at: datetime
+
+    class Config:
+        orm_mode = True
