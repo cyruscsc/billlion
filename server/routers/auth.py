@@ -1,13 +1,13 @@
 from dependencies import crud
 from fastapi import APIRouter, Depends, HTTPException
-from models import body
+from models import user
 from sqlalchemy.orm import Session
 
 router = APIRouter()
 
 
-@router.post("/register", response_model=body.UserOut)
-async def register(user: body.UserRegister, db: Session = Depends(crud.get_db)):
+@router.post("/register", response_model=user.UserOut)
+async def register(user: user.UserInComplete, db: Session = Depends(crud.get_db)):
     db_user = crud.get_user_by_username(db, username=user.username)
     if db_user:
         raise HTTPException(
@@ -23,8 +23,8 @@ async def register(user: body.UserRegister, db: Session = Depends(crud.get_db)):
     return crud.create_user(db, user=user)
 
 
-@router.post("/login", response_model=body.UserOut)
-def login(user: body.UserLogin, db: Session = Depends(crud.get_db)):
+@router.post("/login", response_model=user.UserOut)
+def login(user: user.UserInPartial, db: Session = Depends(crud.get_db)):
     db_user = crud.get_user_by_username(db, username=user.username)
     if not db_user or db_user.hashed_password != user.password + "notreallyhashed":
         raise HTTPException(

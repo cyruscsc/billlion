@@ -1,13 +1,19 @@
-import datetime, enum, uuid
+import uuid
 from database import Base
 from datetime import datetime
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, String, Uuid
+from models import common
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    Float,
+    Integer,
+    ForeignKey,
+    String,
+    Uuid,
+)
 from sqlalchemy.orm import relationship
-
-
-class Status(str, enum.Enum):
-    active = "active"
-    inactive = "inactive"
 
 
 class User(Base):
@@ -18,37 +24,47 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     display_name = Column(String)
-    status = Column(Enum(Status), default=Status.active)
+    status = Column(Enum(common.Status), default=common.Status.active)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 
-    spaces = relationship("Space", secondary="space_user", back_populates="users")
+    bills = relationship("Bill", back_populates="payer")
 
 
-class Space(Base):
-    __tablename__ = "spaces"
+class Category(Base):
+    __tablename__ = "categories"
 
     uuid = Column(Uuid, primary_key=True, index=True, default=uuid.uuid4)
-    name = Column(String, index=True)
-    icon = Column(String)
-    status = Column(Enum(Status), default=Status.active)
+    name = Column(String, default="New Category")
+    icon = Column(String, default="📦")
+    status = Column(Enum(common.Status), default=common.Status.active)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 
-    users = relationship("User", secondary="space_user", back_populates="spaces")
+    bills = relationship("Bill", back_populates="category")
 
 
-class Role(str, enum.Enum):
-    owner = "owner"
-    editor = "editor"
-    viewer = "viewer"
+class Bill(Base):
+    __tablename__ = "bills"
 
-
-class SpaceUser(Base):
-    __tablename__ = "space_user"
-
-    space_uuid = Column(Uuid, ForeignKey("spaces.uuid"), primary_key=True)
-    user_uuid = Column(Uuid, ForeignKey("users.uuid"), primary_key=True)
-    role = Column(Enum(Role), default=Role.viewer)
+    uuid = Column(Uuid, primary_key=True, index=True, default=uuid.uuid4)
+    name = Column(String, default="New Bill")
+    icon = Column(String, default="💸")
+    note = Column(String)
+    amount = Column(Float, default=0)
+    currency = Column(Enum(common.Currency), default=common.Currency.cad)
+    cycle = Column(Integer, default=1)
+    interval = Column(Enum(common.Interval), default=common.Interval.month)
+    first_bill = Column(DateTime, default=datetime.today)
+    payer_uuid = Column(Uuid, ForeignKey("users.uuid"))
+    is_shared = Column(Boolean, default=False)
+    parent_uuid = Column(Uuid, ForeignKey("bills.uuid"), nullable=True)
+    category_uuid = Column(Uuid, ForeignKey("categories.uuid"), nullable=True)
+    status = Column(Enum(common.Status), default=common.Status.active)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
+
+    payer = relationship("User", back_populates="bills")
+    category = relationship("Category", back_populates="bills")
+    parent = relationship("Bill", back_populates="children", remote_side=[uuid])
+    children = relationship("Bill", back_populates="parent")
