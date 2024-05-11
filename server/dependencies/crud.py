@@ -11,7 +11,7 @@ def get_db():
         db.close()
 
 
-def create_user(db: Session, user: body.UserIn):
+def create_user(db: Session, user: body.UserRegister):
     hashed_password = user.password + "notreallyhashed"
     db_user = database.User(
         username=user.username,

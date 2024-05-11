@@ -10,14 +10,33 @@ class UserBase(BaseModel):
     username: str = Field(
         min_length=4,
         max_length=16,
-        regex=r"^[a-z0-9_]+$",
+        pattern=r"^[a-z0-9_]+$",
         description="Username must be 4-16 characters long and only contain lowercase letters, numbers and underscores.",
     )
-    email: str | None = Field(
+
+
+class UserAuth(UserBase):
+    """User authentication model."""
+
+    password: str = Field(
+        min_length=8,
+        pattern=r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$",
+        description="Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number and one special character.",
+    )
+
+    model_config = {
+        "regex_engine": "python-re"  # Workaround for pydantic v2 Rust regex crate issue
+    }
+
+
+class UserInfo(UserBase):
+    """User info model."""
+
+    email: str = Field(
         pattern=r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
         description="Invalid email address.",
     )
-    display_name: str | None = Field(
+    display_name: str = Field(
         default=None,
         min_length=2,
         max_length=16,
@@ -25,25 +44,61 @@ class UserBase(BaseModel):
     )
 
 
-class UserIn(UserBase):
-    """User request body model for user registration, login and update."""
+class UserRegister(UserAuth, UserInfo):
+    """User register model."""
 
-    password: str | None = Field(
-        min_length=8,
-        pattern=r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$",
-        description="Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number and one special character.",
-    )
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "username": "johndoe",
+                    "email": "jdoe@example.com",
+                    "display_name": "John Doe",
+                    "password": "Password123!",
+                }
+            ]
+        },
+    }
 
 
-class UserOut(UserBase):
+class UserLogin(UserAuth):
+    """User login model."""
+
+    pass
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "username": "johndoe",
+                    "password": "Password123!",
+                }
+            ]
+        },
+    }
+
+
+class UserOut(UserInfo):
     """User response body model."""
 
     uuid: UUID
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "uuid": "550e8400-e29b-41d4-a716-446655440000",
+                    "username": "johndoe",
+                    "email": "jdoe@example.com",
+                    "display_name": "John Doe",
+                    "created_at": "2021-10-01T00:00:00Z",
+                    "updated_at": "2021-10-01T00:00:00Z",
+                }
+            ]
+        },
+    }
 
 
 class SpaceBase(BaseModel):
