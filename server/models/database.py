@@ -28,6 +28,7 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 
+    categories = relationship("Category", back_populates="owner")
     bills = relationship("Bill", back_populates="payer")
 
 
@@ -37,10 +38,12 @@ class Category(Base):
     uuid = Column(Uuid, primary_key=True, index=True, default=uuid.uuid4)
     name = Column(String, default="New Category")
     icon = Column(String, default="📦")
+    owner_uuid = Column(Uuid, ForeignKey("users.uuid"))
     status = Column(Enum(common.Status), default=common.Status.active)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 
+    owner = relationship("User", back_populates="categories")
     bills = relationship("Bill", back_populates="category")
 
 

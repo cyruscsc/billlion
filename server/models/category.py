@@ -25,9 +25,34 @@ class CategoryBase(BaseModel):
     )
 
 
-class CategoryIn(CategoryBase):
+class CategoryInWithOwner(CategoryBase):
     """
-    Category input model
+    Category request body model with owner_uuid
+
+    Attributes:
+    - name: str
+    - icon: emoji
+    - owner_uuid: UUID
+    """
+
+    owner_uuid: UUID
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "name": "Food",
+                    "icon": "🍔",
+                    "owner_uuid": "550e8400-e29b-41d4-a716-446655440000",
+                }
+            ]
+        },
+    }
+
+
+class CategoryInWithoutOwner(CategoryBase):
+    """
+    Category request body model without owner_uuid
 
     Attributes:
     - name: str
@@ -46,9 +71,9 @@ class CategoryIn(CategoryBase):
     }
 
 
-class CategoryOut(CategoryBase):
+class CategoryOutBrief(CategoryBase):
     """
-    Category output model
+    Brief category response body model without bills
 
     Attributes:
     - uuid: UUID
@@ -60,6 +85,7 @@ class CategoryOut(CategoryBase):
     """
 
     uuid: UUID
+    owner_uuid: UUID
     status: common.Status
     created_at: datetime
     updated_at: datetime
@@ -71,6 +97,7 @@ class CategoryOut(CategoryBase):
                     "uuid": "550e8400-e29b-41d4-a716-446655440000",
                     "name": "Food",
                     "icon": "🍔",
+                    "owner_uuid": "550e8400-e29b-41d4-a716-446655440000",
                     "status": "active",
                     "created_at": "2021-10-01T00:00:00Z",
                     "updated_at": "2021-10-01T00:00:00Z",
@@ -78,3 +105,6 @@ class CategoryOut(CategoryBase):
             ]
         },
     }
+
+
+# TODO: Create CategoryOutDetailed with list of bills

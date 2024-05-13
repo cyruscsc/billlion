@@ -62,9 +62,9 @@ class UserInfo(UserBase):
     )
 
 
-class UserInComplete(UserAuth, UserInfo):
+class UserInWithInfo(UserAuth, UserInfo):
     """
-    Complete user request body model
+    User request body model with user info
 
     Attributes:
     - username: str
@@ -87,9 +87,9 @@ class UserInComplete(UserAuth, UserInfo):
     }
 
 
-class UserInPartial(UserAuth):
+class UserInWithoutInfo(UserAuth):
     """
-    Partial user request body model
+    User request body model without user info
 
     Attributes:
     - username: str
